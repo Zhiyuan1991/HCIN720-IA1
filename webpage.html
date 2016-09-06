@@ -1,0 +1,117 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="/Users/ZhiyuanLi/Downloads/node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="/Users/ZhiyuanLi/Downloads/node_modules/paper/dist/paper-full.js"></script>
+		<script type="text/paperscript" canvas="paper">
+			var $ = window.$;
+
+			//Fill in the background
+			var background = new Shape.Rectangle(view.bounds);
+			background.fillColor = "yellow";
+
+			//Set up tempture path
+			var path_tempf = new Path();
+			path_tempf.strokeColor = "red";
+
+			var public_key ='ZGYmKDKVMxTDxrx6agWa';
+			function drawData()
+			{
+				$.ajax({
+					url: 'https://data.sparkfun.com/output/' + public_key + '.json',
+					data: {page: 1},
+					dataType: 'jsonp',
+				}).done(
+					function(results)
+					{
+						console.log("Got " + results.length + " results");
+						//set ini location and x_inc
+						var incx = view.bounds.width / results.length;
+						//Start at the middle left of the rectangle
+						var loc_ini = view.bounds.leftCenter-incx;
+						
+						//var circlePath = new Path.Circle(loc_ini, 10);
+						//circlePath.strokeColor = 'black';
+						//var circlePath2 = new Path.Circle(new Point(loc_ini.x,loc_ini.y+10), 10);
+						//circlePath2.strokeColor = 'red';
+						//var stdline = new Path.Line(loc, view.bounds.rightCenter);
+						//stdline.strokeColor = 'red';
+						
+						//set scale for x and y
+						min_y=1000;
+						max_y=-1000;
+						for(var i = results.length-1; i >=0; i--)
+						{
+							row=results[i];
+							tempture=parseFloat(row.tempf);
+							humidity=parseFloat(row.humidity);
+							min_y=Math.min(Math.min(tempture,humidity),min_y);
+							max_y=Math.max(Math.max(tempture,humidity),max_y);
+						}
+						y_scale=view.bounds.height/(max_y-min_y);
+						var text_y_min = new PointText(new Point(0,view.bounds.height));
+						var text_y_max = new PointText(new Point(0,10));
+						text_y_min.justification = 'left';
+						text_y_min.fillColor = 'black';
+						text_y_min.content = min_y;
+						text_y_max.justification = 'left';
+						text_y_max.fillColor = 'black';
+						text_y_max.content = max_y;
+						
+						var text = new PointText(new Point(200, 50));
+						text.justification = 'center';
+						text.fillColor = 'black';
+						k=1;
+						text.content = k;
+						
+						path_tempf.remove();
+						loc_tempf=new Point(loc_ini.x,loc_ini.y);
+						path_tempf = new Path();
+						path_tempf.strokeColor = "red";
+						path_tempf.moveTo(loc_tempf);
+						
+						$('#ResultNum').text(results.length);
+						$('#LeftCenter').text("LeftCenter: "+loc_ini.x+","+loc_ini.y);
+						$('#1stPoint').text(results[0].tempf);
+						count=0;
+						for(var i = results.length-1; i >=0; i--)
+						{
+							count++;
+							//$('#Count').text(count)
+							row = results[i];	
+							//console.log(row);
+							//tempture=view.bounds.height-parseFloat(row.tempf);
+							
+							tempture=(parseFloat(row.tempf)-min_y)*y_scale;
+							tempture=view.bounds.height-parseFloat(tempture);
+							
+							loc_tempf = new Point(loc_tempf.x+incx,tempture);
+							path_tempf.lineTo(loc_tempf);
+						}
+						/*
+						$.each(results,
+							function(index, row)
+							{
+								loc = new Point(loc.x + incx,
+											(parseFloat(row.my) - 95) * 80 + view.bounds.height/2 + 100);
+								path.lineTo(loc);
+							}
+						);
+						*/
+						view.draw();
+						window.setTimeout(drawData, 1000);
+					}
+				);
+			}
+
+			drawData();
+
+		</script>
+	</head>
+	<body>
+		<p id="ResultNum"></p>
+		<p id="Ini_location"></p>
+		<p id="1stPoint"></p>
+		<canvas id="paper" width="500px" height="200px" resize></canvas>
+	</body>
+</html>

@@ -1,8 +1,8 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<script src="node_modules/jquery/dist/jquery.min.js"></script>
-		<script src="paperjs-v0.9.23/dist/paper-full.js"></script>
+		<script src="/Users/ZhiyuanLi/Downloads/node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="/Users/ZhiyuanLi/Downloads/node_modules/paper/dist/paper-full.js"></script>
 		<script type="text/paperscript" canvas="paper">
 			var $ = window.$;
 
@@ -15,6 +15,7 @@
 			path.strokeColor = "black";
 
 			var public_key = 'YGV3jNvQMjh2G4oOLwdx';
+			//var public_key = '4Jr1NG5a80t7X06yqKmO';
 			function drawData()
 			{
 				$.ajax({
@@ -50,7 +51,7 @@
 						);
 						*/
 						view.draw();
-						window.setTimeout(drawData, 30000);
+						window.setTimeout(drawData, 1000);
 					}
 				);
 			}
