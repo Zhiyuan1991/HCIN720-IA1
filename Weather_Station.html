@@ -1,0 +1,172 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>SparkFun Weather Station</title>
+		<script src="node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="node_modules/paper/dist/paper-full.js"></script>
+		<script type="text/paperscript" canvas="paper">
+			var $ = window.$;
+
+			//Fill in the background
+			var background = new Shape.Rectangle(view.bounds);
+			background.fillColor = "yellow";
+
+			//Set up tempture and humidity path
+			var path_tempf = new Path();
+			path_tempf.strokeColor = "red";
+			var path_humi = new Path();
+			path_humi.strokeColor = "blue";
+			
+			text_x_axis_array=[];
+			for (var i=0;i<5;i++){
+				var text_x_axis = new PointText(0,0);
+				text_x_axis.justification = 'center';
+				text_x_axis.fillColor = 'black';
+				text_x_axis.content='';
+				text_x_axis_array[i]=text_x_axis;
+			}
+			
+			
+			
+			var public_key ='ZGYmKDKVMxTDxrx6agWa';
+			function drawData()
+			{
+				$.ajax({
+					url: 'https://data.sparkfun.com/output/' + public_key + '.json',
+					data: {page: 1},
+					dataType: 'jsonp',
+				}).done(
+					function(results)
+					{
+
+						console.log("Got " + results.length + " results");
+						//set original point
+						var space_for_axis=20;
+						ori_point=new Point(view.bounds.bottomLeft.x+space_for_axis, view.bounds.bottomLeft.y-space_for_axis);
+						//set ini location and x_inc
+						var incx = (view.bounds.width-ori_point.x) / results.length;
+						//Start at the middle left of the rectangle
+						var loc_ini = ori_point-incx;
+						
+						//draw x and y axis
+						var x_axis = new Path.Line(ori_point, new Point(view.bounds.width,ori_point.y));
+						var y_axis = new Path.Line(ori_point, new Point(ori_point.x,0));
+						x_axis.strokeColor = 'black';
+						y_axis.strokeColor = 'black';
+						
+						//draw legend
+						var temp_legend = new Path.Line(new Point(400,10),new Point(420,10));
+						temp_legend.strokeColor = 'red';
+						var text_temp_legend= new PointText(new Point(420,15));
+						text_temp_legend.content='temperature(F)';
+						
+						var humi_legend = new Path.Line(new Point(400,30),new Point(420,30));
+						humi_legend.strokeColor = 'blue';
+						var text_humi_legend= new PointText(new Point(420,35));
+						text_humi_legend.content='humidity(RH)';
+						
+						
+
+						
+						//set scale boundary for and y axis
+						min_y=1000;
+						max_y=-1000;
+						for(var i = results.length-1; i >=0; i--)
+						{
+							row=results[i];
+							tempture=parseFloat(row.tempf);
+							humidity=parseFloat(row.humidity);
+							min_y=Math.min(Math.min(tempture,humidity),min_y);
+							max_y=Math.max(Math.max(tempture,humidity),max_y);
+						}
+						max_y=Math.ceil(max_y/10)*10;
+						min_y=Math.floor(min_y/10)*10;
+						y_scale=(view.bounds.height-space_for_axis)/(max_y-min_y);
+						
+						//draw y-axis tick
+						y_scale_nums=(max_y-min_y)/10+1;
+						text_y_axis=[];
+						y_tick_line=[];
+						for (var i=0;i<text_y_axis.length;i++){
+																			text_y_axis[i].content='';
+						}
+						for (var i=0;i<y_tick_line.length;i++){
+																			y_tick_line[i].content='';
+						}
+						for (var i=0;i<y_scale_nums;i++)
+						{
+							var this_y_tick=new Point(ori_point.x,ori_point.y-10*i*y_scale);
+							
+							text_y_axis[i]= new PointText(new Point(this_y_tick.x,this_y_tick.y+8));
+							text_y_axis[i].justification = 'right';
+							text_y_axis[i].fillColor = 'black';
+							text_y_axis[i].content = min_y+i*10;
+							y_tick_line[i] = new Path.Line(this_y_tick, new Point(this_y_tick.x+5,this_y_tick.y));
+							y_tick_line[i].strokeColor = 'black';
+						}
+						
+						
+						path_tempf.remove();
+						loc_tempf=new Point(loc_ini.x,loc_ini.y);
+						path_tempf = new Path();
+						path_tempf.strokeColor = "red";
+						path_tempf.moveTo(loc_tempf);
+						
+						path_humi.remove();
+						loc_humi=new Point(loc_ini.x,loc_ini.y);
+						path_humi = new Path();
+						path_humi.strokeColor = "blue";
+						path_humi.moveTo(loc_humi);
+						
+						count=0;
+						ii=0;
+						for (var i=0;i<5;i++){
+							text_x_axis_array[i].content='';
+						}
+						for(var i = results.length-1; i >=0; i--)
+						{
+							count++;
+							row = results[i];
+							//console.log(row);
+							//draw x-tick
+							if (i%50==0){
+								console.log(i);
+								var this_x_tick=new Point(ori_point.x+(249-i)*incx,ori_point.y);
+								console.log('('+this_x_tick.x+','+this_x_tick.y+')');
+								text_x_axis_array[ii].point = new Point(this_x_tick.x,this_x_tick.y+15);
+								text_x_axis_array[ii].content = (row.timestamp).substring(11,19);
+								var x_tick_line = new Path.Line(this_x_tick, new Point(this_x_tick.x,this_x_tick.y-5));
+								x_tick_line.strokeColor = 'black';
+								ii++;
+							}
+							//draw line for temperature and humidity
+							tempture=(parseFloat(row.tempf)-min_y)*y_scale;
+							tempture=view.bounds.height-space_for_axis-parseFloat(tempture);
+							humidity=(parseFloat(row.humidity)-min_y)*y_scale;
+																			humidity=view.bounds.height-space_for_axis-parseFloat(humidity);
+
+							loc_tempf = new Point(loc_tempf.x+incx,tempture);
+							loc_humi = new Point(loc_humi.x+incx,humidity);
+							if (count==1){
+								path_tempf.moveTo(loc_tempf);
+								path_humi.moveTo(loc_humi);
+							}
+							path_tempf.lineTo(loc_tempf);
+							path_humi.lineTo(loc_humi);
+							
+						}
+						view.draw();
+						window.setTimeout(drawData, 1000);
+					}
+				);
+			}
+
+			drawData();
+
+		</script>
+	</head>
+	<body>
+
+		<canvas id="paper" width="500px" height="200px" resize></canvas>
+	</body>
+</html>
