@@ -129,7 +129,7 @@
 							row = results[i];
 							//console.log(row);
 							//draw x-tick
-							if (i>0&i%50==0){
+							if (i>0 && i%50==0){
 								var this_x_tick=new Point(ori_point.x+(249-i)*incx,ori_point.y);
 																text_x_axis_array[ii].point = new Point(this_x_tick.x,this_x_tick.y+15);
 								text_x_axis_array[ii].content = (row.timestamp).substring(11,19);
