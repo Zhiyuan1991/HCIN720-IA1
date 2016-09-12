@@ -1,7 +1,7 @@
 **********This is the HCIN720 IA1***********
 
 Part A: Sparkfun Weather Station
-(1) weather_station.html shows lines of temperature and humidity. The data is provided by sparkfun.com
+(1) weather_station.html shows lines of temperature and humidity. The data is provided by sparkfun.com(https://data.sparkfun.com/streams/ZGYmKDKVMxTDxrx6agWa)
 (2) Y-axis will automatically change max and min value to show the line more clearly. X-axis shows the time stamp.
 (3) Lines will updated when read new data. New data will appear from the right side of the table.
 
