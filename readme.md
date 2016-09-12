@@ -1,4 +1,4 @@
-**********This is the HCIN720 IA1***********
+#This is the HCIN720 IA1
 
 Part A: Sparkfun Weather Station  
 http://rawgit.com/Zhiyuan1991/HCIN720-IA1/master/Weather_Station.html  
